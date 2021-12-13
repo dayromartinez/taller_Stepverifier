@@ -41,4 +41,29 @@ class SpringWebfluxTestApplicationTests {
 				.expectNext("Carmen")
 				.thenAwait(Duration.ofSeconds(1)).verifyComplete();
 	}
+
+	@Test
+	void testTodosFiltro() {
+		Flux<String> source = servicio.buscarTodosFiltro();
+
+		StepVerifier
+				.create(source)
+				.expectNext("JOHN")
+				.expectNextMatches(name -> name.startsWith("MA"))
+				.expectNext("CLOE", "CATE")
+				.expectComplete()
+				.verify();
+	}
+
+	@Test
+	void testAfirmacionPosteriorEjecucion(){
+
+		Flux<Integer> source = servicio.afirmacionPosteriorEjecucion();
+		StepVerifier.create(source)
+				.expectNext(2)
+				.expectComplete()
+				.verifyThenAssertThat()
+				.hasDropped(4)
+				.tookLessThan(Duration.ofMillis(1000));
+	}
 }
