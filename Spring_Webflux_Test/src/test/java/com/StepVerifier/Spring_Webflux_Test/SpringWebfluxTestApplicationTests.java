@@ -1,12 +1,14 @@
 package com.StepVerifier.Spring_Webflux_Test;
 
 import com.StepVerifier.Spring_Webflux_Test.Service.Servicio;
+import com.StepVerifier.Spring_Webflux_Test.Service.UppercaseConverter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.test.publisher.TestPublisher;
 
 import java.time.Duration;
 
@@ -15,6 +17,8 @@ class SpringWebfluxTestApplicationTests {
 
 	@Autowired
 	Servicio servicio;
+
+	final TestPublisher<String> testPublisher = TestPublisher.create();
 
 	@Test
 	void testMono() {
@@ -65,5 +69,14 @@ class SpringWebfluxTestApplicationTests {
 				.verifyThenAssertThat()
 				.hasDropped(4)
 				.tookLessThan(Duration.ofMillis(1000));
+	}
+
+	@Test
+	void testUpperCase() {
+		UppercaseConverter uppercaseConverter = new UppercaseConverter(testPublisher.flux());
+		StepVerifier.create(uppercaseConverter.getUpperCase())
+				.then(() -> testPublisher.emit("datos", "GeNeRaDoS", "Sofka"))
+				.expectNext("DATOS", "GENERADOS", "SOFKA")
+				.verifyComplete();
 	}
 }
